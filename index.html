@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء شهادة PDF</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -71,7 +71,8 @@
             طباعة أو تحميل الشهادة
         </button>
 
-        <canvas id="certificateCanvas" width="800" height="600"></canvas>
+        <!-- Canvas for drawing the certificate (A4 Landscape aspect ratio: 800x600 is roughly 4:3, for true A4 landscape 842x595, 800x566 is closer to the aspect ratio) -->
+        <canvas id="certificateCanvas" width="800" height="600"></canvas> 
     </div>
 
     <script>
@@ -95,164 +96,269 @@
         const textStrings = {
             ar: {
                 title: 'شهادة إتمام',
-                authorityStatement1: 'تشهد إدارة تطبيق جامعيون ممثلة برئيسها',
+                authorityStatement1: 'تشهد إدارة تطبيق جامعيون',
+                authorityStatement2: 'ممثلة برئيسها',
                 presidentName: 'بدر فرحان',
                 proudCompletion: 'بكل فخر واعتزاز إتمام',
                 requirementsStatement: 'المتطلبات اللازمة للحصول على الشهادة في',
                 signatureLabel: 'توقيع',
-                issueDateLabel: 'تاريخ الإصدار:'
+                issueDateLabel: 'تاريخ الإصدار'
             },
             en: {
                 title: 'Certificate of Completion',
-                authorityStatement1: 'The management of Jamioun App, represented by its president',
+                authorityStatement1: 'The management of Jamioun App,',
+                authorityStatement2: 'represented by its president',
                 presidentName: 'Bader Farhan',
                 proudCompletion: 'hereby proudly certifies the successful completion by',
                 requirementsStatement: 'of the requirements for obtaining the certificate in',
                 signatureLabel: 'Signature',
-                issueDateLabel: 'Issue Date:'
+                issueDateLabel: 'Issue Date'
             }
         };
 
+        // Helper function for exponential backoff (not strictly needed for local canvas, but good practice for external API calls)
+        const waitForDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+        const maxRetries = 3;
+
+        // Function to load the logo image with retry
+        async function loadLogo() {
+            const logoUrl = 'https://i.imgur.com/Yw4B14g.png'; // 📌 قم بتغيير هذا الرابط إلى رابط شعارك 📌
+            const logo = new Image();
+            logo.src = logoUrl;
+            
+            return new Promise((resolve, reject) => {
+                logo.onload = () => resolve(logo);
+                logo.onerror = () => reject(new Error("Failed to load logo image."));
+            });
+        }
+        
+        // Function to draw a 5-pointed star (symbol)
+        function drawStar(cx, cy, outerRadius, innerRadius) {
+            let rot = Math.PI / 2 * 3;
+            let x = cx;
+            let y = cy;
+            let step = Math.PI / 5;
+
+            ctx.beginPath();
+            for (let i = 0; i < 5; i++) {
+                x = cx + Math.cos(rot) * outerRadius;
+                y = cy + Math.sin(rot) * outerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+
+                x = cx + Math.cos(rot) * innerRadius;
+                y = cy + Math.sin(rot) * innerRadius;
+                ctx.lineTo(x, y);
+                rot += step;
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        // Function to draw subtle diagonal background lines
+        function drawDiagonalLines(canvasWidth, canvasHeight) {
+            ctx.strokeStyle = '#f0f9ff'; // لون أبيض باهت جدًا
+            ctx.lineWidth = 0.8;
+            const stripeSpacing = 30;
+            for (let i = 0; i < (canvasWidth + canvasHeight) / stripeSpacing; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * stripeSpacing, 0);
+                ctx.lineTo(0, i * stripeSpacing);
+                ctx.stroke();
+            }
+        }
+
+
         // Function to draw the certificate on the canvas
-        function drawCertificate(name, courseName, lang) {
+        async function drawCertificate(name, courseName, lang) {
             // Get the appropriate text strings for the selected language
             const texts = textStrings[lang];
+            const canvasWidth = certificateCanvas.width;
+            const canvasHeight = certificateCanvas.height;
 
             // Set text direction for the canvas context based on language
             ctx.direction = (lang === 'ar' ? 'rtl' : 'ltr');
 
             // Clear previous drawings
-            ctx.clearRect(0, 0, certificateCanvas.width, certificateCanvas.height);
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // Background color
+            // --- Stylish Borders and Decorative Elements ---
+            
+            // Background color (White as requested)
             ctx.fillStyle = '#FFFFFF';
-            ctx.fillRect(0, 0, certificateCanvas.width, certificateCanvas.height);
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+            
+            // 1. Decorative subtle diagonal stripes (on the white background)
+            drawDiagonalLines(canvasWidth, canvasHeight);
 
-            // --- New Stylish Borders and Accent Lines ---
-            // Outer blue border
+            // Outer dark blue border (refined thickness)
             ctx.strokeStyle = '#003463';
-            ctx.lineWidth = 15;
-            ctx.strokeRect(0, 0, certificateCanvas.width, certificateCanvas.height);
+            ctx.lineWidth = 6;
+            ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
-            // Inner light blue rectangle
-            ctx.fillStyle = '#eaf8ff'; // A very light tint of the blue
-            ctx.fillRect(20, 20, certificateCanvas.width - 40, certificateCanvas.height - 40);
+            // Inner light blue tinted area removed for a pure white background
 
-            // Decorative lines at the top and bottom
+            // Horizontal accent lines at top 
             ctx.strokeStyle = '#0090de';
-            ctx.lineWidth = 5;
+            ctx.lineWidth = 2.5;
+            
+            // Top Accent Line
             ctx.beginPath();
             ctx.moveTo(40, 40);
-            ctx.lineTo(certificateCanvas.width - 40, 40);
+            ctx.lineTo(canvasWidth - 40, 40);
             ctx.stroke();
 
+
+            // Decorative circles (Corner only - removed bottom ones for cleaner footer)
+            ctx.fillStyle = '#f0f9ff';
+            ctx.strokeStyle = '#0090de';
+            ctx.lineWidth = 1.5;
+
+            // Top-right decorative circle (filled)
             ctx.beginPath();
-            ctx.moveTo(40, certificateCanvas.height - 40);
-            ctx.lineTo(certificateCanvas.width - 40, certificateCanvas.height - 40);
+            ctx.arc(canvasWidth - 60, 60, 25, 0, 2 * Math.PI);
+            ctx.fill();
             ctx.stroke();
 
+            // Top-left decorative circle (filled)
+            ctx.beginPath();
+            ctx.arc(60, 60, 25, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+            
             // --- Add Logo ---
-            const logoUrl = 'https://i.imgur.com/Yw4B14g.png'; // 📌 قم بتغيير هذا الرابط إلى رابط شعارك 📌
-            const logo = new Image();
-            logo.src = logoUrl;
-            
-            logo.onload = () => {
-                // Adjust position based on language
-                let logoX = certificateCanvas.width - 150; // default for Arabic (right side)
-                if (lang === 'en') {
-                    logoX = 50; // for English (left side)
+            try {
+                const logo = await loadLogo();
+                // Adjust position based on language (top-left or top-right)
+                let logoX = 50;
+                if (lang === 'ar') {
+                    logoX = canvasWidth - 130; // Placed on the right for RTL layout
+                } else {
+                    logoX = 50; // Placed on the left for LTR layout
                 }
-
-                ctx.drawImage(logo, logoX, 60, 100, 100);
-                drawTextContent(); // Call the function to draw text after the image is loaded
-            };
-
-            logo.onerror = () => {
-                console.error("Failed to load logo image.");
-                drawTextContent(); // Draw text content even if logo fails
-            };
-            
-            // Function to draw all text content
-            function drawTextContent() {
-                // --- Certificate Title ---
-                ctx.fillStyle = '#003463';
-                ctx.font = 'bold 60px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText(texts.title, certificateCanvas.width / 2, 120);
-
-                // --- Main certificate text ---
-                ctx.fillStyle = '#374151'; // Dark gray for main text
-                let currentY = 220; // Starting Y position
-                const standardLineHeight = 45;
-                const nameLineHeight = 60;
-
-                ctx.textAlign = 'center';
-
-                // 1. Authority Statement
-                ctx.font = '26px Inter, sans-serif';
-                ctx.fillText(texts.authorityStatement1, certificateCanvas.width / 2, currentY);
-                currentY += standardLineHeight;
-
-                // 2. President's Name (bold and clear)
-                ctx.font = 'bold 36px Inter, sans-serif';
-                ctx.fillText(texts.presidentName, certificateCanvas.width / 2, currentY);
-                currentY += nameLineHeight + 20;
-
-                // 3. "proudly certifies the successful completion"
-                ctx.font = '28px Inter, sans-serif';
-                ctx.fillText(texts.proudCompletion, certificateCanvas.width / 2, currentY);
-                currentY += standardLineHeight;
-
-                // 4. User's Name (most prominent, distinct color)
-                ctx.font = 'bold 48px Inter, sans-serif';
-                ctx.fillStyle = '#fdac13'; // The new orange color
-                ctx.fillText(name, certificateCanvas.width / 2, currentY);
-                currentY += nameLineHeight + 20;
-
-                // 5. Requirements Statement
-                ctx.font = '28px Inter, sans-serif';
-                ctx.fillStyle = '#374151'; // Reset color
-                ctx.fillText(texts.requirementsStatement, certificateCanvas.width / 2, currentY);
-                currentY += standardLineHeight;
-
-                // 6. Course Name (prominent)
-                ctx.font = 'bold 36px Inter, sans-serif';
-                ctx.fillText(courseName, certificateCanvas.width / 2, currentY);
-                currentY += nameLineHeight + 10;
-
-                // --- Signature & Date Section ---
-                const bottomAreaY = certificateCanvas.height - 80;
-                ctx.textAlign = 'center';
-
-                // Signature block
-                ctx.fillStyle = '#003463';
-                ctx.font = '22px Inter, sans-serif';
-                let signatureBlockX = certificateCanvas.width - 200;
-                if (lang === 'en') {
-                    signatureBlockX = 200;
-                }
-                ctx.fillText(texts.signatureLabel, signatureBlockX, bottomAreaY);
-                ctx.strokeStyle = '#003463';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(signatureBlockX - 100, bottomAreaY + 10);
-                ctx.lineTo(signatureBlockX + 100, bottomAreaY + 10);
-                ctx.stroke();
-                ctx.font = 'bold 22px Inter, sans-serif';
-                ctx.fillText(texts.presidentName, signatureBlockX, bottomAreaY + 40);
-
-                // Date block
-                ctx.fillStyle = '#6B7280';
-                ctx.font = '18px Inter, sans-serif';
-                let dateBlockX = 200;
-                if (lang === 'en') {
-                    dateBlockX = certificateCanvas.width - 200;
-                }
-                const today = new Date();
-                const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
-                ctx.fillText(texts.issueDateLabel, dateBlockX, bottomAreaY);
-                ctx.fillText(`${dateString}`, dateBlockX, bottomAreaY + 30);
+                ctx.drawImage(logo, logoX, 50, 80, 80);
+            } catch (error) {
+                console.error(error.message);
             }
+
+            // --- Draw Text Content ---
+            
+            // --- Certificate Title ---
+            ctx.fillStyle = '#003463';
+            ctx.font = '900 55px Inter, sans-serif'; // Used '900' for thicker font weight
+            ctx.textAlign = 'center';
+            ctx.fillText(texts.title, canvasWidth / 2, 100);
+            
+            // --- Poetic Wave / Ribbon Design ---
+            ctx.fillStyle = '#0090de'; // Light blue color
+            ctx.beginPath();
+            // Start left
+            ctx.moveTo(0, 160); 
+            // Top control point creates a gentle curve upwards
+            ctx.bezierCurveTo(canvasWidth * 0.25, 130, canvasWidth * 0.75, 130, canvasWidth, 160); 
+            // Bottom edge of the ribbon
+            ctx.lineTo(canvasWidth, 180); 
+            ctx.bezierCurveTo(canvasWidth * 0.75, 150, canvasWidth * 0.25, 150, 0, 180); 
+            ctx.closePath();
+            ctx.fill();
+
+            // --- Main certificate text ---
+            ctx.fillStyle = '#003463'; // Dark blue for main text
+            let currentY = 230; // Adjusted start Y position to be below the wave/ribbon
+            const standardLineHeight = 35;
+            const nameLineHeight = 58;
+
+            ctx.textAlign = 'center';
+
+            // 1. Authority Statement (split for better fit)
+            ctx.font = '400 24px Inter, sans-serif';
+            ctx.fillText(texts.authorityStatement1, canvasWidth / 2, currentY);
+            currentY += standardLineHeight;
+            ctx.fillText(texts.authorityStatement2, canvasWidth / 2, currentY);
+            currentY += standardLineHeight + 10;
+
+            // 2. President's Name (bold)
+            ctx.font = 'bold 30px Inter, sans-serif';
+            ctx.fillText(texts.presidentName, canvasWidth / 2, currentY);
+            currentY += nameLineHeight + 15;
+
+            // 3. Proud Completion
+            ctx.font = '400 26px Inter, sans-serif';
+            ctx.fillText(texts.proudCompletion, canvasWidth / 2, currentY);
+            currentY += standardLineHeight + 10;
+
+            // 4. User's Name (prominent, orange color)
+            ctx.font = 'bold 46px Inter, sans-serif';
+            ctx.fillStyle = '#fdac13'; // Orange color (البرتقالي)
+            ctx.fillText(name, canvasWidth / 2, currentY);
+
+            // --- Add Orange Stars/Flourishes around the name ---
+            const starY = currentY - 15; // Vertical position adjustment
+            const starSpacing = 160; // Distance from center
+            const starOuterRadius = 15;
+            const starInnerRadius = 6;
+            
+            // Draw stars near the name
+            drawStar(canvasWidth / 2 + starSpacing, starY, starOuterRadius, starInnerRadius);
+            drawStar(canvasWidth / 2 - starSpacing, starY, starOuterRadius, starInnerRadius);
+            // ---------------------------------------------
+            
+            currentY += nameLineHeight + 20;
+            ctx.fillStyle = '#003463'; // Reset color
+
+            // 5. Requirements Statement
+            ctx.font = '400 26px Inter, sans-serif';
+            ctx.fillText(texts.requirementsStatement, canvasWidth / 2, currentY);
+            currentY += standardLineHeight + 15;
+
+            // 6. Course Name (prominent, bold, slightly larger)
+            ctx.font = 'bold 38px Inter, sans-serif';
+            ctx.fillText(courseName, canvasWidth / 2, currentY);
+            
+            // --- Signature & Date Section ---
+            
+            // New position: Use 100px margin from the edge
+            const marginFromEdge = 100;
+            const dateBlockX = lang === 'ar' ? marginFromEdge : canvasWidth - marginFromEdge; 
+            const signatureBlockX = lang === 'ar' ? canvasWidth - marginFromEdge : marginFromEdge;
+            const footerY = canvasHeight - 90;
+
+            // Date calculation (Fixed date for certificate context)
+            const today = new Date('2025-09-27'); 
+            const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+            
+            ctx.textAlign = 'center';
+            ctx.fillStyle = '#003463';
+
+            // --- Date Block ---
+            
+            // 1. Label
+            ctx.font = '500 20px Inter, sans-serif';
+            ctx.fillText(texts.issueDateLabel, dateBlockX, footerY - 10);
+
+            // 2. Date Value (Highlighted)
+            ctx.font = 'bold 24px Inter, sans-serif';
+            ctx.fillStyle = '#0090de'; // Light blue for date
+            ctx.fillText(`${dateString}`, dateBlockX, footerY + 20);
+            ctx.fillStyle = '#003463'; // Reset
+            
+            // --- Signature Block ---
+
+            // 1. Label
+            ctx.font = '500 20px Inter, sans-serif';
+            ctx.fillText(texts.signatureLabel, signatureBlockX, footerY - 10);
+            
+            // 2. Signature Line (thicker and darker)
+            ctx.strokeStyle = '#003463'; 
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(signatureBlockX - 80, footerY + 15);
+            ctx.lineTo(signatureBlockX + 80, footerY + 15);
+            ctx.stroke();
+
+            // 3. President's Name
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText(texts.presidentName, signatureBlockX, footerY + 45);
         }
 
         // Event listener for the button
@@ -274,11 +380,12 @@
             const courseName = courseData[selectedLanguage];
 
             // Draw the certificate on the canvas
-            drawCertificate(userName, courseName, selectedLanguage);
+            drawCertificate(userName, courseName, selectedLanguage).then(() => {
+                // IMPORTANT: The code is now structured to directly generate and download the PDF
+                // without the 200ms delay and without showing a confirmation message.
 
-            // Wait for a brief moment to ensure the canvas drawing is complete
-            setTimeout(() => {
                 const { jsPDF } = window.jspdf;
+                // Note: Dimensions are in pixels for jsPDF
                 const doc = new jsPDF({
                     orientation: 'landscape',
                     unit: 'px',
@@ -288,14 +395,16 @@
                 doc.addImage(certificateCanvas.toDataURL('image/png'), 'PNG', 0, 0, certificateCanvas.width, certificateCanvas.height);
                 doc.save(`${selectedLanguage === 'ar' ? 'شهادة' : 'Certificate'}_${userName}.pdf`);
 
+                // We can still display a quick confirmation that the download process started
                 displayMessage(
-                    selectedLanguage === 'ar' ? 'تم إنشاء وتحميل الشهادة بنجاح!' : 'Certificate successfully generated and downloaded!',
+                    selectedLanguage === 'ar' ? 'تم بدء عملية تنزيل ملف PDF...' : 'PDF download process initiated...',
                     'green'
                 );
-            }, 100); // Small delay to ensure the canvas is fully rendered, especially with the image
+            });
+           
         });
 
-        // Function to display a temporary message
+        // Function to display a temporary message (remains the same)
         function displayMessage(message, type) {
             let messageBox = document.getElementById('messageBox');
             if (!messageBox) {
