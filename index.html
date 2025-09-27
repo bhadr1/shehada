@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>إنشاء شهادة PDF</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- jsPDF CDN for PDF generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -20,10 +17,10 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-500 to-purple-600 min-h-screen flex items-center justify-center p-4">
+<body class="bg-[#003463] min-h-screen flex items-center justify-center p-4">
 
     <div class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-md text-center">
-        <h1 class="text-4xl font-extrabold text-gray-800 mb-6 tracking-tight">
+        <h1 class="text-4xl font-extrabold text-[#003463] mb-6 tracking-tight">
             إنشاء شهادة
         </h1>
         <p class="text-gray-600 mb-8 text-lg">
@@ -38,7 +35,7 @@
                 type="text"
                 id="userName"
                 placeholder="أدخل اسمك هنا..."
-                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 ease-in-out text-gray-800"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0090de] transition duration-300 ease-in-out text-gray-800"
             />
         </div>
 
@@ -50,7 +47,7 @@
                 type="text"
                 id="certificateCode"
                 placeholder="أدخل الرمز هنا (مثال: 147)..."
-                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 ease-in-out text-gray-800"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0090de] transition duration-300 ease-in-out text-gray-800"
             />
         </div>
 
@@ -60,7 +57,7 @@
             </label>
             <select
                 id="languageSelect"
-                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-300 ease-in-out text-gray-800"
+                class="w-full px-4 py-3 rounded-lg border-2 border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#0090de] transition duration-300 ease-in-out text-gray-800"
             >
                 <option value="ar">العربية</option>
                 <option value="en">English</option>
@@ -69,12 +66,11 @@
 
         <button
             id="generatePdfBtn"
-            class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-75"
+            class="w-full bg-[#0090de] hover:bg-sky-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition duration-300 ease-in-out hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#0090de] focus:ring-opacity-75"
         >
             طباعة أو تحميل الشهادة
         </button>
 
-        <!-- Hidden canvas for drawing the certificate -->
         <canvas id="certificateCanvas" width="800" height="600"></canvas>
     </div>
 
@@ -100,7 +96,7 @@
             ar: {
                 title: 'شهادة إتمام',
                 authorityStatement1: 'تشهد إدارة تطبيق جامعيون ممثلة برئيسها',
-                presidentName: 'بدر الزعبي',
+                presidentName: 'بدر فرحان',
                 proudCompletion: 'بكل فخر واعتزاز إتمام',
                 requirementsStatement: 'المتطلبات اللازمة للحصول على الشهادة في',
                 signatureLabel: 'توقيع',
@@ -109,7 +105,7 @@
             en: {
                 title: 'Certificate of Completion',
                 authorityStatement1: 'The management of Jamioun App, represented by its president',
-                presidentName: 'Bader Al-Zoubi',
+                presidentName: 'Bader Farhan',
                 proudCompletion: 'hereby proudly certifies the successful completion by',
                 requirementsStatement: 'of the requirements for obtaining the certificate in',
                 signatureLabel: 'Signature',
@@ -128,117 +124,135 @@
             // Clear previous drawings
             ctx.clearRect(0, 0, certificateCanvas.width, certificateCanvas.height);
 
-            // Background color - a very subtle light grey
-            ctx.fillStyle = '#F8F8F8';
+            // Background color
+            ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, certificateCanvas.width, certificateCanvas.height);
 
-            // --- Clean & Elegant Borders ---
-            // Main outer border - a soft blue/indigo
-            ctx.strokeStyle = '#6366F1'; // Medium Indigo
-            ctx.lineWidth = 10;
-            ctx.strokeRect(20, 20, certificateCanvas.width - 40, certificateCanvas.height - 40);
+            // --- New Stylish Borders and Accent Lines ---
+            // Outer blue border
+            ctx.strokeStyle = '#003463';
+            ctx.lineWidth = 15;
+            ctx.strokeRect(0, 0, certificateCanvas.width, certificateCanvas.height);
 
-            // Inner thin line - a darker accent
-            ctx.strokeStyle = '#3730A3'; // Darker Indigo
-            ctx.lineWidth = 2;
-            ctx.strokeRect(30, 30, certificateCanvas.width - 60, certificateCanvas.height - 60);
+            // Inner light blue rectangle
+            ctx.fillStyle = '#eaf8ff'; // A very light tint of the blue
+            ctx.fillRect(20, 20, certificateCanvas.width - 40, certificateCanvas.height - 40);
 
-            // --- Certificate Title ---
-            ctx.fillStyle = '#1F2937'; // Dark gray text
-            ctx.font = 'bold 65px Inter, sans-serif'; // Prominent, but not overly large
-            ctx.textAlign = 'center';
-            ctx.fillText(texts.title, certificateCanvas.width / 2, 120);
-
-            // --- Main certificate text - Balanced and refined ---
-            ctx.fillStyle = '#374151'; // Darker gray for main text
-            let currentY = 230; // Starting Y position for the main text block
-            const standardLineHeight = 45; // Increased standard line height
-            const nameLineHeight = 60; // Increased spacing for prominent names
-
-            ctx.textAlign = 'center'; // All main text centered
-
-            // 1. Authority Statement
-            ctx.font = '26px Inter, sans-serif'; // Slightly smaller font
-            ctx.fillText(texts.authorityStatement1, certificateCanvas.width / 2, currentY);
-            currentY += standardLineHeight;
-
-            // 2. President's Name (bold and clear)
-            ctx.font = 'bold 36px Inter, sans-serif'; // Bold and medium size
-            ctx.fillText(texts.presidentName, certificateCanvas.width / 2, currentY);
-            currentY += nameLineHeight + 20; // More space after president's name
-
-            // 3. "بكل فخر واعتزاز إتمام" / "hereby proudly certifies the successful completion by"
-            ctx.font = '28px Inter, sans-serif';
-            ctx.fillText(texts.proudCompletion, certificateCanvas.width / 2, currentY);
-            currentY += standardLineHeight;
-
-            // 4. User's Name (most prominent, distinct color)
-            ctx.font = 'bold 48px Inter, sans-serif'; // Largest and boldest
-            ctx.fillStyle = '#FFD700'; // Gold color for user name - a slightly yellow shade
-            ctx.fillText(name, certificateCanvas.width / 2, currentY);
-            currentY += nameLineHeight + 20; // More space after user's name
-
-            // 5. Requirements Statement
-            ctx.font = '28px Inter, sans-serif';
-            ctx.fillStyle = '#374151'; // Reset color
-            ctx.fillText(texts.requirementsStatement, certificateCanvas.width / 2, currentY);
-            currentY += standardLineHeight;
-
-            // 6. Course Name (prominent)
-            ctx.font = 'bold 36px Inter, sans-serif'; // Bold and medium size
-            ctx.fillText(courseName, certificateCanvas.width / 2, currentY);
-            currentY += nameLineHeight + 10; // Extra space after main text block
-
-
-            // --- Signature & Date Section (positioned at the bottom, in extreme corners) ---
-            const bottomAreaY = certificateCanvas.height - 80; // Adjusted Y-coordinate to be closer to the bottom
-
-            // Signature block
-            ctx.fillStyle = '#1F2937';
-            ctx.font = '22px Inter, sans-serif';
-            ctx.textAlign = 'center'; // Center the signature elements within their block
-
-            // Position for signature block (Right for AR, Left for EN)
-            let signatureBlockX = certificateCanvas.width - 100; // Closer to the absolute right edge for Arabic
-
-            // Date block
-            ctx.fillStyle = '#6B7280';
-            ctx.font = '18px Inter, sans-serif';
-            ctx.textAlign = 'center';
-
-            // Position for date block (Left for AR, Right for EN)
-            let dateBlockX = 100; // Closer to the absolute left edge for Arabic
-
-            // Swap positions for LTR languages for better visual flow
-            if (lang === 'en') {
-                signatureBlockX = 100; // Closer to the absolute left edge for English
-                dateBlockX = certificateCanvas.width - 100; // Closer to the absolute right edge for English
-            }
-
-            const signatureLineLength = 180; // Shorter, cleaner line
-
-            // Draw Signature Block
-            ctx.fillText(texts.signatureLabel, signatureBlockX, bottomAreaY); // Signature label
-            ctx.strokeStyle = '#6B7280';
-            ctx.lineWidth = 1;
+            // Decorative lines at the top and bottom
+            ctx.strokeStyle = '#0090de';
+            ctx.lineWidth = 5;
             ctx.beginPath();
-            ctx.moveTo(signatureBlockX - signatureLineLength / 2, bottomAreaY + 10);
-            ctx.lineTo(signatureBlockX + signatureLineLength / 2, bottomAreaY + 10);
+            ctx.moveTo(40, 40);
+            ctx.lineTo(certificateCanvas.width - 40, 40);
             ctx.stroke();
 
-            ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText(texts.presidentName, signatureBlockX, bottomAreaY + 40); // President's name
+            ctx.beginPath();
+            ctx.moveTo(40, certificateCanvas.height - 40);
+            ctx.lineTo(certificateCanvas.width - 40, certificateCanvas.height - 40);
+            ctx.stroke();
 
+            // --- Add Logo ---
+            const logoUrl = 'https://i.imgur.com/Yw4B14g.png'; // 📌 قم بتغيير هذا الرابط إلى رابط شعارك 📌
+            const logo = new Image();
+            logo.src = logoUrl;
+            
+            logo.onload = () => {
+                // Adjust position based on language
+                let logoX = certificateCanvas.width - 150; // default for Arabic (right side)
+                if (lang === 'en') {
+                    logoX = 50; // for English (left side)
+                }
 
-            // Draw Date Block
-            ctx.fillStyle = '#6B7280';
-            ctx.font = '18px Inter, sans-serif';
-            ctx.textAlign = 'center';
-            const today = new Date();
-            const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`; // Formats as DD/MM/YYYY
+                ctx.drawImage(logo, logoX, 60, 100, 100);
+                drawTextContent(); // Call the function to draw text after the image is loaded
+            };
 
-            ctx.fillText(texts.issueDateLabel, dateBlockX, bottomAreaY); // Date label
-            ctx.fillText(`${dateString}`, dateBlockX, bottomAreaY + 30); // Actual date
+            logo.onerror = () => {
+                console.error("Failed to load logo image.");
+                drawTextContent(); // Draw text content even if logo fails
+            };
+            
+            // Function to draw all text content
+            function drawTextContent() {
+                // --- Certificate Title ---
+                ctx.fillStyle = '#003463';
+                ctx.font = 'bold 60px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(texts.title, certificateCanvas.width / 2, 120);
+
+                // --- Main certificate text ---
+                ctx.fillStyle = '#374151'; // Dark gray for main text
+                let currentY = 220; // Starting Y position
+                const standardLineHeight = 45;
+                const nameLineHeight = 60;
+
+                ctx.textAlign = 'center';
+
+                // 1. Authority Statement
+                ctx.font = '26px Inter, sans-serif';
+                ctx.fillText(texts.authorityStatement1, certificateCanvas.width / 2, currentY);
+                currentY += standardLineHeight;
+
+                // 2. President's Name (bold and clear)
+                ctx.font = 'bold 36px Inter, sans-serif';
+                ctx.fillText(texts.presidentName, certificateCanvas.width / 2, currentY);
+                currentY += nameLineHeight + 20;
+
+                // 3. "proudly certifies the successful completion"
+                ctx.font = '28px Inter, sans-serif';
+                ctx.fillText(texts.proudCompletion, certificateCanvas.width / 2, currentY);
+                currentY += standardLineHeight;
+
+                // 4. User's Name (most prominent, distinct color)
+                ctx.font = 'bold 48px Inter, sans-serif';
+                ctx.fillStyle = '#fdac13'; // The new orange color
+                ctx.fillText(name, certificateCanvas.width / 2, currentY);
+                currentY += nameLineHeight + 20;
+
+                // 5. Requirements Statement
+                ctx.font = '28px Inter, sans-serif';
+                ctx.fillStyle = '#374151'; // Reset color
+                ctx.fillText(texts.requirementsStatement, certificateCanvas.width / 2, currentY);
+                currentY += standardLineHeight;
+
+                // 6. Course Name (prominent)
+                ctx.font = 'bold 36px Inter, sans-serif';
+                ctx.fillText(courseName, certificateCanvas.width / 2, currentY);
+                currentY += nameLineHeight + 10;
+
+                // --- Signature & Date Section ---
+                const bottomAreaY = certificateCanvas.height - 80;
+                ctx.textAlign = 'center';
+
+                // Signature block
+                ctx.fillStyle = '#003463';
+                ctx.font = '22px Inter, sans-serif';
+                let signatureBlockX = certificateCanvas.width - 200;
+                if (lang === 'en') {
+                    signatureBlockX = 200;
+                }
+                ctx.fillText(texts.signatureLabel, signatureBlockX, bottomAreaY);
+                ctx.strokeStyle = '#003463';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(signatureBlockX - 100, bottomAreaY + 10);
+                ctx.lineTo(signatureBlockX + 100, bottomAreaY + 10);
+                ctx.stroke();
+                ctx.font = 'bold 22px Inter, sans-serif';
+                ctx.fillText(texts.presidentName, signatureBlockX, bottomAreaY + 40);
+
+                // Date block
+                ctx.fillStyle = '#6B7280';
+                ctx.font = '18px Inter, sans-serif';
+                let dateBlockX = 200;
+                if (lang === 'en') {
+                    dateBlockX = certificateCanvas.width - 200;
+                }
+                const today = new Date();
+                const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
+                ctx.fillText(texts.issueDateLabel, dateBlockX, bottomAreaY);
+                ctx.fillText(`${dateString}`, dateBlockX, bottomAreaY + 30);
+            }
         }
 
         // Event listener for the button
@@ -248,12 +262,10 @@
             const selectedLanguage = languageSelect.value;
 
             if (!userName || !enteredCode) {
-                // Simple message box for validation (language independent for this error)
                 displayMessage('الرجاء إدخال الاسم ورمز الدورة / Please enter your name and course code.', 'red');
                 return;
             }
 
-            // Validate the entered code and get course name based on selected language
             const courseData = validCodes[enteredCode];
             if (!courseData) {
                 displayMessage('رمز الدورة غير صحيح. الرجاء إدخال رمز صالح. / Invalid course code. Please enter a valid code.', 'red');
@@ -264,24 +276,23 @@
             // Draw the certificate on the canvas
             drawCertificate(userName, courseName, selectedLanguage);
 
-            // Create a new jsPDF instance
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF({
-                orientation: 'landscape', // Landscape for a wider certificate
-                unit: 'px',
-                format: [certificateCanvas.width, certificateCanvas.height]
-            });
+            // Wait for a brief moment to ensure the canvas drawing is complete
+            setTimeout(() => {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [certificateCanvas.width, certificateCanvas.height]
+                });
+                
+                doc.addImage(certificateCanvas.toDataURL('image/png'), 'PNG', 0, 0, certificateCanvas.width, certificateCanvas.height);
+                doc.save(`${selectedLanguage === 'ar' ? 'شهادة' : 'Certificate'}_${userName}.pdf`);
 
-            // Add the canvas image to the PDF
-            doc.addImage(certificateCanvas.toDataURL('image/png'), 'PNG', 0, 0, certificateCanvas.width, certificateCanvas.height);
-
-            // Save the PDF
-            doc.save(`${selectedLanguage === 'ar' ? 'شهادة' : 'Certificate'}_${userName}.pdf`);
-
-            displayMessage(
-                selectedLanguage === 'ar' ? 'تم إنشاء وتحميل الشهادة بنجاح!' : 'Certificate successfully generated and downloaded!',
-                'green'
-            );
+                displayMessage(
+                    selectedLanguage === 'ar' ? 'تم إنشاء وتحميل الشهادة بنجاح!' : 'Certificate successfully generated and downloaded!',
+                    'green'
+                );
+            }, 100); // Small delay to ensure the canvas is fully rendered, especially with the image
         });
 
         // Function to display a temporary message
@@ -303,13 +314,12 @@
                 messageBox.className = 'fixed bottom-4 left-1/2 -translate-x-1/2 p-4 rounded-lg shadow-lg text-white font-medium z-50 bg-green-500 transition-opacity duration-300';
             }
 
-            // Clear any existing timeout to prevent multiple messages from interfering
             if (messageBox.timeoutId) {
                 clearTimeout(messageBox.timeoutId);
             }
             messageBox.timeoutId = setTimeout(() => {
                 messageBox.style.opacity = '0';
-            }, 3000); // Message disappears after 3 seconds
+            }, 3000);
         }
     </script>
 </body>
