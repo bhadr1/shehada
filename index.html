@@ -10,10 +10,10 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            direction: rtl; /* Default to Right-to-left for Arabic */
+            direction: rtl; 
         }
         canvas {
-            display: none; /* Hide the canvas, it's used for PDF generation */
+            display: none; 
         }
     </style>
 </head>
@@ -71,12 +71,10 @@
             طباعة أو تحميل الشهادة
         </button>
 
-        <!-- Canvas for drawing the certificate (A4 Landscape aspect ratio: 800x600 is roughly 4:3, for true A4 landscape 842x595, 800x566 is closer to the aspect ratio) -->
-        <canvas id="certificateCanvas" width="800" height="600"></canvas> 
+        <canvas id="certificateCanvas" width="3200" height="2400"></canvas> 
     </div>
 
     <script>
-        // Get references to elements
         const userNameInput = document.getElementById('userName');
         const certificateCodeInput = document.getElementById('certificateCode');
         const languageSelect = document.getElementById('languageSelect');
@@ -84,7 +82,8 @@
         const certificateCanvas = document.getElementById('certificateCanvas');
         const ctx = certificateCanvas.getContext('2d');
 
-        // Define valid certificate codes and their corresponding course names in both languages
+        const SCALE_FACTOR = 4;
+        
         const validCodes = {
             '147': { ar: 'أساسيات البرمجة', en: 'Programming Fundamentals' },
             '258': { ar: 'التسويق الرقمي المتقدم', en: 'Advanced Digital Marketing' },
@@ -92,11 +91,11 @@
             '789': { ar: 'تصميم واجهات المستخدم', en: 'User Interface Design' }
         };
 
-        // Text strings for different languages
+
         const textStrings = {
             ar: {
-                title: 'شهادة إتمام',
-                authorityStatement1: 'تشهد إدارة تطبيق جامعيون',
+                title: 'شهادة تقدير',
+                authorityStatement1: 'تشهد إدارة جامعيون',
                 authorityStatement2: 'ممثلة برئيسها',
                 presidentName: 'بدر فرحان',
                 proudCompletion: 'بكل فخر واعتزاز إتمام',
@@ -116,13 +115,15 @@
             }
         };
 
-        // Helper function for exponential backoff (not strictly needed for local canvas, but good practice for external API calls)
+      
+        
         const waitForDelay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
         const maxRetries = 3;
 
-        // Function to load the logo image with retry
+
         async function loadLogo() {
-            const logoUrl = 'https://i.imgur.com/Yw4B14g.png'; // 📌 قم بتغيير هذا الرابط إلى رابط شعارك 📌
+            
+            const logoUrl = './assets/img/logo-jamii.png'; 
             const logo = new Image();
             logo.src = logoUrl;
             
@@ -132,7 +133,7 @@
             });
         }
         
-        // Function to draw a 5-pointed star (symbol)
+
         function drawStar(cx, cy, outerRadius, innerRadius) {
             let rot = Math.PI / 2 * 3;
             let x = cx;
@@ -155,11 +156,11 @@
             ctx.fill();
         }
 
-        // Function to draw subtle diagonal background lines
+
         function drawDiagonalLines(canvasWidth, canvasHeight) {
-            ctx.strokeStyle = '#f0f9ff'; // لون أبيض باهت جدًا
-            ctx.lineWidth = 0.8;
-            const stripeSpacing = 30;
+            ctx.strokeStyle = '#f0f9ff'; 
+            ctx.lineWidth = 0.8 * SCALE_FACTOR;
+            const stripeSpacing = 30 * SCALE_FACTOR; 
             for (let i = 0; i < (canvasWidth + canvasHeight) / stripeSpacing; i++) {
                 ctx.beginPath();
                 ctx.moveTo(i * stripeSpacing, 0);
@@ -169,199 +170,191 @@
         }
 
 
-        // Function to draw the certificate on the canvas
+       
         async function drawCertificate(name, courseName, lang) {
-            // Get the appropriate text strings for the selected language
+            
             const texts = textStrings[lang];
             const canvasWidth = certificateCanvas.width;
             const canvasHeight = certificateCanvas.height;
 
-            // Set text direction for the canvas context based on language
+           
             ctx.direction = (lang === 'ar' ? 'rtl' : 'ltr');
 
-            // Clear previous drawings
+            
             ctx.clearRect(0, 0, canvasWidth, canvasHeight);
 
-            // --- Stylish Borders and Decorative Elements ---
             
-            // Background color (White as requested)
             ctx.fillStyle = '#FFFFFF';
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
             
-            // 1. Decorative subtle diagonal stripes (on the white background)
+           
             drawDiagonalLines(canvasWidth, canvasHeight);
 
-            // Outer dark blue border (refined thickness)
+           
             ctx.strokeStyle = '#003463';
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 6 * SCALE_FACTOR; 
             ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
 
-            // Inner light blue tinted area removed for a pure white background
-
-            // Horizontal accent lines at top 
-            ctx.strokeStyle = '#0090de';
-            ctx.lineWidth = 2.5;
             
-            // Top Accent Line
+            ctx.strokeStyle = '#0090de';
+            ctx.lineWidth = 2.5 * SCALE_FACTOR; 
+            
+            
             ctx.beginPath();
-            ctx.moveTo(40, 40);
-            ctx.lineTo(canvasWidth - 40, 40);
+            ctx.moveTo(40 * SCALE_FACTOR, 40 * SCALE_FACTOR); 
+            ctx.lineTo(canvasWidth - (40 * SCALE_FACTOR), 40 * SCALE_FACTOR); 
             ctx.stroke();
 
 
-            // Decorative circles (Corner only - removed bottom ones for cleaner footer)
+           
             ctx.fillStyle = '#f0f9ff';
             ctx.strokeStyle = '#0090de';
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 1.5 * SCALE_FACTOR; 
 
-            // Top-right decorative circle (filled)
+          
             ctx.beginPath();
-            ctx.arc(canvasWidth - 60, 60, 25, 0, 2 * Math.PI);
+            ctx.arc(canvasWidth - (60 * SCALE_FACTOR), 60 * SCALE_FACTOR, 25 * SCALE_FACTOR, 0, 2 * Math.PI); // Scaled
             ctx.fill();
             ctx.stroke();
 
-            // Top-left decorative circle (filled)
+        
             ctx.beginPath();
-            ctx.arc(60, 60, 25, 0, 2 * Math.PI);
+            ctx.arc(60 * SCALE_FACTOR, 60 * SCALE_FACTOR, 25 * SCALE_FACTOR, 0, 2 * Math.PI); // Scaled
             ctx.fill();
             ctx.stroke();
             
-            // --- Add Logo ---
+           
             try {
                 const logo = await loadLogo();
-                // Adjust position based on language (top-left or top-right)
-                let logoX = 50;
+                
+                let logoSize = 80 * SCALE_FACTOR;
+                let logoMargin = 50 * SCALE_FACTOR;
+                let logoX = logoMargin;
                 if (lang === 'ar') {
-                    logoX = canvasWidth - 130; // Placed on the right for RTL layout
+                    logoX = canvasWidth - (130 * SCALE_FACTOR); 
                 } else {
-                    logoX = 50; // Placed on the left for LTR layout
+                    logoX = logoMargin; 
                 }
-                ctx.drawImage(logo, logoX, 50, 80, 80);
+                ctx.drawImage(logo, logoX, logoMargin, logoSize, logoSize); 
             } catch (error) {
                 console.error(error.message);
             }
 
-            // --- Draw Text Content ---
-            
-            // --- Certificate Title ---
             ctx.fillStyle = '#003463';
-            ctx.font = '900 55px Inter, sans-serif'; // Used '900' for thicker font weight
+            ctx.font = `900 ${48 * SCALE_FACTOR}px Inter, sans-serif`; // Scaled font size
             ctx.textAlign = 'center';
-            ctx.fillText(texts.title, canvasWidth / 2, 100);
+           
+            ctx.fillText(texts.title, canvasWidth / 2, 90 * SCALE_FACTOR); 
             
-            // --- Poetic Wave / Ribbon Design ---
-            ctx.fillStyle = '#0090de'; // Light blue color
+          
+            ctx.fillStyle = '#0090de'; 
             ctx.beginPath();
-            // Start left
-            ctx.moveTo(0, 160); 
-            // Top control point creates a gentle curve upwards
-            ctx.bezierCurveTo(canvasWidth * 0.25, 130, canvasWidth * 0.75, 130, canvasWidth, 160); 
-            // Bottom edge of the ribbon
-            ctx.lineTo(canvasWidth, 180); 
-            ctx.bezierCurveTo(canvasWidth * 0.75, 150, canvasWidth * 0.25, 150, 0, 180); 
+         
+            ctx.moveTo(0, 150 * SCALE_FACTOR); 
+            ctx.bezierCurveTo(canvasWidth * 0.25, 120 * SCALE_FACTOR, canvasWidth * 0.75, 120 * SCALE_FACTOR, canvasWidth, 150 * SCALE_FACTOR); 
+            ctx.lineTo(canvasWidth, 170 * SCALE_FACTOR); 
+            ctx.bezierCurveTo(canvasWidth * 0.75, 140 * SCALE_FACTOR, canvasWidth * 0.25, 140 * SCALE_FACTOR, 0, 170 * SCALE_FACTOR); 
             ctx.closePath();
             ctx.fill();
 
-            // --- Main certificate text ---
-            ctx.fillStyle = '#003463'; // Dark blue for main text
-            let currentY = 230; // Adjusted start Y position to be below the wave/ribbon
-            const standardLineHeight = 35;
-            const nameLineHeight = 58;
+         
+            ctx.fillStyle = '#003463';
+          
+            let currentY = 210 * SCALE_FACTOR; 
+            const standardLineHeight = 30 * SCALE_FACTOR;
+            const nameLineHeight = 50 * SCALE_FACTOR; 
 
             ctx.textAlign = 'center';
 
-            // 1. Authority Statement (split for better fit)
-            ctx.font = '400 24px Inter, sans-serif';
+            ctx.font = `400 ${22 * SCALE_FACTOR}px Inter, sans-serif`; 
             ctx.fillText(texts.authorityStatement1, canvasWidth / 2, currentY);
             currentY += standardLineHeight;
             ctx.fillText(texts.authorityStatement2, canvasWidth / 2, currentY);
-            currentY += standardLineHeight + 10;
+            currentY += standardLineHeight + (10 * SCALE_FACTOR); 
 
-            // 2. President's Name (bold)
-            ctx.font = 'bold 30px Inter, sans-serif';
+
+            ctx.font = `bold ${26 * SCALE_FACTOR}px Inter, sans-serif`; 
             ctx.fillText(texts.presidentName, canvasWidth / 2, currentY);
-            currentY += nameLineHeight + 15;
+            currentY += nameLineHeight + (20 * SCALE_FACTOR); 
 
-            // 3. Proud Completion
-            ctx.font = '400 26px Inter, sans-serif';
+
+            ctx.font = `400 ${22 * SCALE_FACTOR}px Inter, sans-serif`; 
             ctx.fillText(texts.proudCompletion, canvasWidth / 2, currentY);
-            currentY += standardLineHeight + 10;
+            currentY += standardLineHeight + (10 * SCALE_FACTOR); 
 
-            // 4. User's Name (prominent, orange color)
-            ctx.font = 'bold 46px Inter, sans-serif';
-            ctx.fillStyle = '#fdac13'; // Orange color (البرتقالي)
+
+            ctx.font = `bold ${40 * SCALE_FACTOR}px Inter, sans-serif`; 
+            ctx.fillStyle = '#fdac13'; 
             ctx.fillText(name, canvasWidth / 2, currentY);
 
-            // --- Add Orange Stars/Flourishes around the name ---
-            const starY = currentY - 15; // Vertical position adjustment
-            const starSpacing = 160; // Distance from center
-            const starOuterRadius = 15;
-            const starInnerRadius = 6;
+
+            const starY = currentY - (10 * SCALE_FACTOR); 
+            const starSpacing = 160 * SCALE_FACTOR; 
+            const starOuterRadius = 14 * SCALE_FACTOR; 
+            const starInnerRadius = 6 * SCALE_FACTOR; 
             
-            // Draw stars near the name
             drawStar(canvasWidth / 2 + starSpacing, starY, starOuterRadius, starInnerRadius);
             drawStar(canvasWidth / 2 - starSpacing, starY, starOuterRadius, starInnerRadius);
-            // ---------------------------------------------
+
             
-            currentY += nameLineHeight + 20;
-            ctx.fillStyle = '#003463'; // Reset color
+            currentY += nameLineHeight + (10 * SCALE_FACTOR); 
+            ctx.fillStyle = '#003463'; 
 
-            // 5. Requirements Statement
-            ctx.font = '400 26px Inter, sans-serif';
+            
+            ctx.font = `400 ${22 * SCALE_FACTOR}px Inter, sans-serif`; 
             ctx.fillText(texts.requirementsStatement, canvasWidth / 2, currentY);
-            currentY += standardLineHeight + 15;
+            currentY += standardLineHeight + (15 * SCALE_FACTOR); 
 
-            // 6. Course Name (prominent, bold, slightly larger)
-            ctx.font = 'bold 38px Inter, sans-serif';
+
+            ctx.font = `bold ${32 * SCALE_FACTOR}px Inter, sans-serif`; 
             ctx.fillText(courseName, canvasWidth / 2, currentY);
             
-            // --- Signature & Date Section ---
+
             
-            // New position: Use 100px margin from the edge
-            const marginFromEdge = 100;
+
+            const marginFromEdge = 100 * SCALE_FACTOR;
             const dateBlockX = lang === 'ar' ? marginFromEdge : canvasWidth - marginFromEdge; 
             const signatureBlockX = lang === 'ar' ? canvasWidth - marginFromEdge : marginFromEdge;
-            const footerY = canvasHeight - 90;
+            const footerY = canvasHeight - (90 * SCALE_FACTOR); 
 
-            // Date calculation (Fixed date for certificate context)
+
             const today = new Date('2025-09-27'); 
             const dateString = `${today.getDate()}/${today.getMonth() + 1}/${today.getFullYear()}`;
             
             ctx.textAlign = 'center';
             ctx.fillStyle = '#003463';
 
-            // --- Date Block ---
+         
             
-            // 1. Label
-            ctx.font = '500 20px Inter, sans-serif';
-            ctx.fillText(texts.issueDateLabel, dateBlockX, footerY - 10);
+            ctx.font = `500 ${20 * SCALE_FACTOR}px Inter, sans-serif`; 
+            ctx.fillText(texts.issueDateLabel, dateBlockX, footerY - (10 * SCALE_FACTOR)); 
 
-            // 2. Date Value (Highlighted)
-            ctx.font = 'bold 24px Inter, sans-serif';
-            ctx.fillStyle = '#0090de'; // Light blue for date
-            ctx.fillText(`${dateString}`, dateBlockX, footerY + 20);
-            ctx.fillStyle = '#003463'; // Reset
+           
             
-            // --- Signature Block ---
+            ctx.font = `bold ${24 * SCALE_FACTOR}px Inter, sans-serif`; 
+            ctx.fillStyle = '#0090de';
+            ctx.fillText(`${dateString}`, dateBlockX, footerY + (20 * SCALE_FACTOR)); 
+            ctx.fillStyle = '#003463'; 
+            
 
-            // 1. Label
-            ctx.font = '500 20px Inter, sans-serif';
-            ctx.fillText(texts.signatureLabel, signatureBlockX, footerY - 10);
+            ctx.font = `500 ${20 * SCALE_FACTOR}px Inter, sans-serif`; 
+            ctx.fillText(texts.signatureLabel, signatureBlockX, footerY - (10 * SCALE_FACTOR)); 
             
-            // 2. Signature Line (thicker and darker)
+            
             ctx.strokeStyle = '#003463'; 
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 2 * SCALE_FACTOR; 
             ctx.beginPath();
-            ctx.moveTo(signatureBlockX - 80, footerY + 15);
-            ctx.lineTo(signatureBlockX + 80, footerY + 15);
+            ctx.moveTo(signatureBlockX - (80 * SCALE_FACTOR), footerY + (15 * SCALE_FACTOR)); 
+            ctx.lineTo(signatureBlockX + (80 * SCALE_FACTOR), footerY + (15 * SCALE_FACTOR)); 
             ctx.stroke();
 
-            // 3. President's Name
-            ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText(texts.presidentName, signatureBlockX, footerY + 45);
+           
+            
+            ctx.font = `bold ${22 * SCALE_FACTOR}px Inter, sans-serif`; 
+            ctx.fillText(texts.presidentName, signatureBlockX, footerY + (45 * SCALE_FACTOR)); 
         }
 
-        // Event listener for the button
+
         generatePdfBtn.addEventListener('click', () => {
             const userName = userNameInput.value.trim();
             const enteredCode = certificateCodeInput.value.trim();
@@ -379,32 +372,29 @@
             }
             const courseName = courseData[selectedLanguage];
 
-            // Draw the certificate on the canvas
-            drawCertificate(userName, courseName, selectedLanguage).then(() => {
-                // IMPORTANT: The code is now structured to directly generate and download the PDF
-                // without the 200ms delay and without showing a confirmation message.
 
+            drawCertificate(userName, courseName, selectedLanguage).then(() => {
                 const { jsPDF } = window.jspdf;
-                // Note: Dimensions are in pixels for jsPDF
+
                 const doc = new jsPDF({
                     orientation: 'landscape',
                     unit: 'px',
-                    format: [certificateCanvas.width, certificateCanvas.height]
+                    format: [certificateCanvas.width, certificateCanvas.height] 
                 });
                 
                 doc.addImage(certificateCanvas.toDataURL('image/png'), 'PNG', 0, 0, certificateCanvas.width, certificateCanvas.height);
                 doc.save(`${selectedLanguage === 'ar' ? 'شهادة' : 'Certificate'}_${userName}.pdf`);
 
-                // We can still display a quick confirmation that the download process started
+
                 displayMessage(
                     selectedLanguage === 'ar' ? 'تم بدء عملية تنزيل ملف PDF...' : 'PDF download process initiated...',
                     'green'
                 );
             });
-           
+            
         });
 
-        // Function to display a temporary message (remains the same)
+
         function displayMessage(message, type) {
             let messageBox = document.getElementById('messageBox');
             if (!messageBox) {
